@@ -5,7 +5,6 @@ let finish = false;
 
 const digit = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'];
 const action = ['-', '+', 'X', '/', '+/-', '🠖'];
-
 const out = document.querySelector('.calc-screen p');
 
 function clearAll() {
@@ -27,40 +26,47 @@ document.querySelector('.buttons').onclick = (event) => {
     return;
   }
 
-  out.textContent = '';
   const key = event.target.textContent;
   let isFinish = firstNumber !== '' && secondNumber !== '' && finish;
-  let isFirstNumber = (firstNumber === '' && operationSign === '') ||
-                      (firstNumber && secondNumber === '' && !operationSign);
+  let isSecondNumber = firstNumber !== '' && operationSign !== '';
 
   // если нажата 0-9 или .
   if (digit.includes(key)) {
-    if (isFirstNumber) {
-      firstNumber += key;
-      out.textContent = firstNumber;
-    } else if (isFinish) {
-      secondNumber = key;
+    if (isFinish) {
+      firstNumber = key;
       finish = false;
-      out.textContent = secondNumber;
-    } else {
+      out.textContent = number;
+    } else if (isSecondNumber) { // проверка, чтобы занести второе число
+      if (key.includes('.') && secondNumber.includes('.')) {
+        return;
+      }
+      
       secondNumber += key;
       out.textContent = secondNumber;
+    }
+    else {
+      if (key.includes('.') && firstNumber.includes('.')) {
+        return;
+      }
+      
+      firstNumber += key;
+      out.textContent = firstNumber;
     }
 
     return;
   }
 
-  // если нажаты + - / *
+  // если нажаты + - / * +/- ->
   if (action.includes(key)) {
+    let activeNumber = secondNumber || firstNumber;
     operationSign = key;
-    out.textContent = operationSign;
 
     switch (operationSign) {
       case '+':
         if (secondNumber) {
           firstNumber = +firstNumber + +secondNumber;
           secondNumber = '';
-          out.textContent = firstNumber;
+          out.textContent = operationSign;
           return;
         }
 
@@ -69,7 +75,7 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber - secondNumber;
           secondNumber = '';
-          out.textContent = firstNumber;
+          out.textContent = operationSign;
           return;
         }
   
@@ -78,7 +84,7 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber * secondNumber;
           secondNumber = '';
-          out.textContent = firstNumber;
+          out.textContent = operationSign;
           return;
         }
   
@@ -87,7 +93,7 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber / secondNumber;
           secondNumber = '';
-          out.textContent = firstNumber;
+          out.textContent = operationSign;
           return;
         }
   
@@ -101,20 +107,26 @@ document.querySelector('.buttons').onclick = (event) => {
   
         break;
       case '+/-':
-        if (key > 0) {
-          '-' + key;
+        activeNumber *= -1;
+
+        if (secondNumber) {
+          secondNumber = activeNumber.toString();
         } else {
-          '+' + key;
-        }
-        
-        break;
-      case '🠖':
-        if (firstNumber) {
-          firstNumber.split().pop.join();
-        } else {
-          secondNumber.split().pop.join();
+          firstNumber = activeNumber.toString();
         }
 
+        out.textContent = secondNumber || firstNumber;
+        break;
+      case '🠖':
+        if (activeNumber.length <= 1) {
+          (secondNumber) ? secondNumber = '' : firstNumber = '';
+        } else {
+          activeNumber = activeNumber.substring(0, activeNumber.length - 1);
+
+          (secondNumber) ? secondNumber = activeNumber : firstNumber = activeNumber;
+        }
+
+        out.textContent = secondNumber || firstNumber || 0;
         break;
     }
   }
@@ -127,15 +139,20 @@ document.querySelector('.buttons').onclick = (event) => {
       secondNumber = firstNumber;
     }
 
+    let result;
+
     switch (operationSign) {
       case '+':
-        firstNumber = +firstNumber + +secondNumber;
+        result = +firstNumber + +secondNumber;
+        firstNumber = result.toFixed(8);
         break;
       case '-':
-        firstNumber = firstNumber - secondNumber;
+        result = firstNumber - secondNumber;
+        firstNumber = result.toFixed(8);
         break;
       case 'X':
-        firstNumber = firstNumber * secondNumber;
+        result = firstNumber * secondNumber;
+        firstNumber = result.toFixed(8);
         break;
       case '/':
         if (secondNumber === '0') {
@@ -146,14 +163,9 @@ document.querySelector('.buttons').onclick = (event) => {
           return;
         }
 
-        firstNumber = firstNumber / secondNumber;
+        result = firstNumber / secondNumber;
+        firstNumber = result.toFixed(8);
         break;
-      case '🠖':
-        if (firstNumber) {
-          firstNumber.split().pop.join();
-        } else {
-          secondNumber.split().pop.join();
-        }
     }
 
     finish = true;
