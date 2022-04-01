@@ -60,13 +60,13 @@ document.querySelector('.buttons').onclick = (event) => {
   if (action.includes(key)) {
     let activeNumber = secondNumber || firstNumber;
     operationSign = key;
+    out.textContent = operationSign;
 
     switch (operationSign) {
       case '+':
         if (secondNumber) {
           firstNumber = +firstNumber + +secondNumber;
           secondNumber = '';
-          out.textContent = operationSign;
           return;
         }
 
@@ -75,7 +75,6 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber - secondNumber;
           secondNumber = '';
-          out.textContent = operationSign;
           return;
         }
   
@@ -84,7 +83,6 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber * secondNumber;
           secondNumber = '';
-          out.textContent = operationSign;
           return;
         }
   
@@ -93,7 +91,6 @@ document.querySelector('.buttons').onclick = (event) => {
         if (secondNumber) {
           firstNumber = firstNumber / secondNumber;
           secondNumber = '';
-          out.textContent = operationSign;
           return;
         }
   
